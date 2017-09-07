@@ -151,8 +151,8 @@ def build_model(nn_hdim,num_passes=1):
         db2 = np.sum(delta3,axis = 0,keepdims = True)
         delta2 = delta3.dot(W2.T)* (1 - np.power(a1,2))
         dW1 = np.dot(X.T,delta2)
+        stop
         db1 = np.sum(delta2,axis=0)
-
 
         W1 += -eps*dW1
         b1 += -eps*db1         
