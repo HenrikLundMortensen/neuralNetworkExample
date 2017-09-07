@@ -1,0 +1,40 @@
+\documentclass{memoir}
+\usepackage[]{amsmath}
+
+\renewcommand{\thesection}{}
+
+\title{Neural Networks \\ \small{A simple example}}
+\author{Henrik Lund Mortensen}
+
+\begin{document}
+
+\maketitle
+
+
+\section{Introduction}
+\begin{equation}
+  \label{softmax}
+  \text{softmax}(\vec{x})_i = \frac{e^{\vec{x}_i}}{\sum_k e^{\vec{x}_k}}
+\end{equation}
+\begin{equation}
+  \label{cross entropy}
+  \text{Err}(\hat{\vec{y}},\vec{y}) = \frac{-1}{N} \sum_{n\in N} \sum_{i \in C} \vec{y}_{n,i} \log \hat{\vec{y}}_{n,i}
+\end{equation}
+
+
+\section{Backpropagation} 
+
+\begin{align}
+  \label{dLdb_i}
+  \frac{\partial L}{\partial \vec{b}^{(i)}} &= \frac{\partial L}{\partial \vec{b}^{(i+1)}} \cdot{W}^{T(i+1)} \circ (1-\vec{z^{(i)}}\circ \vec{z^{(i)}})\\
+  \frac{\partial L}{\partial \vec{b}^{(N_\text{layer})}} &= \frac{\hat{\vec{y}}-\vec{y} }{N_{\text{samples}}}\\
+  \label{dLdW_i}
+  \frac{\partial L}{\partial \vec{W}^{(i)}} &=
+                                              \begin{cases}
+                                                \vec{z}^{(i-1)} \otimes \frac{dL}{db^{(i)}} & \text{if } i \geq 2 \\
+                                                \vec{x}\otimes \frac{dL}{db^{(i)}}  & \text{if } i = 1
+                                              \end{cases}
+\end{align}
+
+
+\end{document}

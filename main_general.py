@@ -19,7 +19,8 @@ for i in range(len(y)):
     if y[i] == 0:
         ytmp[i] = [1,0]
     else:
-        ytmp[i] = [0,1]        
+        ytmp[i] = [0,1]
+        
 
 y = np.array(ytmp)
     
@@ -27,7 +28,7 @@ nn_hdim = 3
 num_examples = len(X)
 nn_input_dim = 2
 nn_output_dim = 2
-nn_nlayer = 2
+nn_nlayer = 1
 
 def softmax(xlist):
     """
@@ -78,7 +79,7 @@ def getGradient(model,X,yhat,y,z):
     i = nn_nlayer
     while i > 0:
         i -= 1
-        dLdb[i] = dLdb[i+1].dot(np.transpose(W[i+1])) * (1-z[i]*z[i])
+        dLdb[i] = dLdb[i+1].dot(np.transpose(W[i+1])) * (1-np.power(z[i],2))
         if i != 0:
             dLdW[i] = np.dot(z[i-1].T,dLdb[i])
         else:
@@ -134,7 +135,7 @@ def plotDecisionBoundary(model):
 def build_model(nn_hdim,num_passes=1):
     """
     """
-    eps = 0.001
+    eps = 0.01
 
     W = []
     b = []
@@ -151,6 +152,11 @@ def build_model(nn_hdim,num_passes=1):
                 b.append(np.zeros((1, nn_hdim)))
 
     model = [W,b]
+
+    W1 = W[0]
+    W2 = W[1]
+    b1 = b[0]
+    b2 = b[1]
     for i in range(num_passes):
         [yhat,z] = predict(model,X)
         yhat = np.round(yhat)
@@ -161,11 +167,30 @@ def build_model(nn_hdim,num_passes=1):
             W[i] += -eps*dLdW[i]
             b[i] += -eps*dLdb[i]
 
+        z1 = X.dot(W1) + b1
+        a1 = np.tanh(z1)
+        z2 = a1.dot(W2) + b2
+        a2 = softmax(z2)
+
+        delta3 = a2
+        delta3[range(num_examples),ycopy] -=1
+        print(delta3)
+        # print('[range(num_examples),y] = %s' %([range(num_examples),y],))
+        dW2 = (a1.T).dot(delta3)
+        db2 = np.sum(delta3,axis = 0,keepdims = True)
+        delta2 = delta3.dot(W2.T)* (1 - np.power(a1,2))
+        dW1 = np.dot(X.T,delta2)
+        db1 = np.sum(delta2,axis=0)
+        print(db1)
+        print(dLdb)
+        print(db2)
+        stop
+            
         model = [W,b]
 
     return model
 
-model = build_model(nn_hdim,num_passes=20000)
+model = build_model(nn_hdim,num_passes=1000)
 
 # X, y = sklearn.datasets.make_moons(200, noise=0.2)
 y = ycopy
