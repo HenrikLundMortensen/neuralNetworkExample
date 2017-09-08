@@ -4,8 +4,11 @@ from matplotlib import pyplot as plt
 
 
 X, y = sklearn.datasets.make_moons(200, noise=0.2)
-# X, y = sklearn.datasets.make_blobs(n_features=2, centers=2)
-ycopy = y
+# X, y = sklearn.datasets.make_blobs(n_features=2, centers=3,n_samples=1000)
+# X, y = sklearn.datasets.make_classification(n_features=2, n_redundant=0, n_informative=2,
+#                              n_clusters_per_class=1)
+
+ycopy = y.copy()
 ytmp = [None]*len(y)
 # for i in range(len(y)):
 #     if y[i] == 0:
@@ -21,50 +24,32 @@ for i in range(len(y)):
     else:
         ytmp[i] = [0,1]
         
-
 y = np.array(ytmp)
     
 nn_hdim = 3
 num_examples = len(X)
 nn_input_dim = 2
 nn_output_dim = 2
-nn_nlayer = 1
+nn_nlayer = 2
 
 def softmax(xlist):
     """
     """
 
     res = [np.exp(x) for x in xlist]
-
     res /= np.sum(res,axis=1, keepdims=True)
     return res
 
-    
-def calculateLoss(model):
+def calculateLoss(yhat):
     """
     """
 
-    W1 = model[0]
-    b1 = model[1]
-    W2 = model[2]
-    b2 = model[3]    
-
-
-    z1 = X.dot(W1) + b1
-    a1 = np.tanh(z1)
-    z2 = a1.dot(W2) + b2
-    a2 = softmax(z2)
-
-    # print('z1.shape = %s' %(z1.shape,))
-    # print('a1.shape = %s' %(a1.shape,))
-
-    correct_logprobs = -np.log(a2[range(num_examples),y])
+    correct_logprobs = np.sum(-y*np.log(yhat),axis=1)
     data_loss = np.sum(correct_logprobs)
     return data_loss/num_examples
 
 def getGradient(model,X,yhat,y,z):
     """
-
     """
     N = num_examples
     W = model[0]
@@ -79,7 +64,7 @@ def getGradient(model,X,yhat,y,z):
     i = nn_nlayer
     while i > 0:
         i -= 1
-        dLdb[i] = dLdb[i+1].dot(np.transpose(W[i+1])) * (1-np.power(z[i],2))
+        dLdb[i] = dLdb[i+1].dot(W[i+1].T) * (1-np.power(z[i],2))
         if i != 0:
             dLdW[i] = np.dot(z[i-1].T,dLdb[i])
         else:
@@ -92,6 +77,7 @@ def getGradient(model,X,yhat,y,z):
 def predict(model,x):
     """
     """
+    
     W = model[0]
     b = model[1]
 
@@ -100,22 +86,21 @@ def predict(model,x):
 
     for i in range(nn_nlayer+1):
         if i == 0:
-            a[i] = np.dot(x,W[i])+ b[i]
+            a[i] = x.dot(W[i])+ b[i]
             z[i] = np.tanh(a[i])
         else:
             if i != nn_nlayer:
-                a[i] = np.dot(z[i-1],W[i]) + b[i]
+                a[i] = z[i-1].dot(W[i]) + b[i]
                 z[i] = np.tanh(a[i])
             else:
-                a[i] = np.dot(z[i-1],W[i]) + b[i]
+                a[i] = z[i-1].dot(W[i]) + b[i]
 
-    return [softmax(a[-1]),z]
+    return [softmax(a[nn_nlayer]),z]
 
-
-def plotDecisionBoundary(model):
+def plotDecisionBoundary(model,fig):
     """
-
     """
+    
     # Create mesh grid
 
     xmin = min(X[:,0])-0.5
@@ -123,19 +108,30 @@ def plotDecisionBoundary(model):
     ymin = min(X[:,1])-0.5
     ymax = max(X[:,1])+0.5
 
-    h = 0.01
+    # xmin = -20
+    # xmax = 20
+    # ymin = -20
+    # ymax = 20
+
+    h = 0.05
+
+
     xx,yy = np.meshgrid(np.arange(xmin,xmax,h),np.arange(ymin,ymax,h))
 
     Z = np.argmax(predict(model,np.c_[xx.ravel(),yy.ravel()])[0],axis=1)
     Z = Z.reshape(xx.shape)
+    ax = fig.gca()
+    ax.contourf(xx,yy,Z,cmap = plt.cm.Spectral)
+    ax.scatter(X[:,0], X[:,1], s=40, c=ycopy, cmap=plt.cm.Spectral)
+    ax.set_xticks([])    
+    ax.set_yticks([])    
 
-    plt.contourf(xx,yy,Z,cmap = plt.cm.Spectral)
-    plt.scatter(X[:,0], X[:,1], s=40, c=y, cmap=plt.cm.Spectral)
 
 def build_model(nn_hdim,num_passes=1):
     """
     """
-    eps = 0.01
+    eps = 0.001
+    reg_lambda = 0.0000
 
     W = []
     b = []
@@ -152,47 +148,31 @@ def build_model(nn_hdim,num_passes=1):
                 b.append(np.zeros((1, nn_hdim)))
 
     model = [W,b]
-
-    W1 = W[0]
-    W2 = W[1]
-    b1 = b[0]
-    b2 = b[1]
+    fig = plt.figure()
     for i in range(num_passes):
         [yhat,z] = predict(model,X)
-        yhat = np.round(yhat)
+
         [dLdW,dLdb] = getGradient(model,X,yhat,y,z)
 
+        for j in range(nn_nlayer+1):
+            W[j] += -eps*dLdW[j]
+            W[j] += reg_lambda*W[j]            
 
-        for i in range(nn_nlayer+1):
-            W[i] += -eps*dLdW[i]
-            b[i] += -eps*dLdb[i]
+            b[j] += -eps*dLdb[j]
+        model = [W,b]    
 
-        z1 = X.dot(W1) + b1
-        a1 = np.tanh(z1)
-        z2 = a1.dot(W2) + b2
-        a2 = softmax(z2)
+        if np.mod(i,50) == 0:
+            loss = calculateLoss(yhat)
 
-        delta3 = a2
-        delta3[range(num_examples),ycopy] -=1
-        print(delta3)
-        # print('[range(num_examples),y] = %s' %([range(num_examples),y],))
-        dW2 = (a1.T).dot(delta3)
-        db2 = np.sum(delta3,axis = 0,keepdims = True)
-        delta2 = delta3.dot(W2.T)* (1 - np.power(a1,2))
-        dW1 = np.dot(X.T,delta2)
-        db1 = np.sum(delta2,axis=0)
-        print(db1)
-        print(dLdb)
-        print(db2)
-        stop
-            
-        model = [W,b]
-
+            print(loss)
+            plotDecisionBoundary(model,fig)
+            plt.pause(0.0001)
+            if loss < 0.03:
+                break
+        
     return model
 
-model = build_model(nn_hdim,num_passes=1000)
-
+model = build_model(nn_hdim,num_passes=10000)
 # X, y = sklearn.datasets.make_moons(200, noise=0.2)
-y = ycopy
-plotDecisionBoundary(model)
-plt.savefig('decisionBoundary.png')
+# y = ycopy
+
