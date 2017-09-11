@@ -1,7 +1,17 @@
 import numpy as np
 import sklearn.datasets
-from matplotlib import pyplot as plt
+import matplotlib
+matplotlib.use("Agg")
 
+from matplotlib import pyplot as plt
+import matplotlib.animation as manimation
+
+
+
+FFMpegWriter = manimation.writers['ffmpeg']
+metadata = dict(title='Movie Test', artist='Matplotlib',
+                comment='Movie support!')
+writer = FFMpegWriter(fps=15, metadata=metadata)
 
 X, y = sklearn.datasets.make_moons(200, noise=0.2)
 # X, y = sklearn.datasets.make_blobs(n_features=2, centers=3,n_samples=1000)
@@ -149,26 +159,27 @@ def build_model(nn_hdim,num_passes=1):
 
     model = [W,b]
     fig = plt.figure()
-    for i in range(num_passes):
-        [yhat,z] = predict(model,X)
+    with writer.saving(fig, "writer_test.mp4",dpi=200):
+        for i in range(num_passes):
+            [yhat,z] = predict(model,X)
 
-        [dLdW,dLdb] = getGradient(model,X,yhat,y,z)
+            [dLdW,dLdb] = getGradient(model,X,yhat,y,z)
 
-        for j in range(nn_nlayer+1):
-            W[j] += -eps*dLdW[j]
-            W[j] += reg_lambda*W[j]            
+            for j in range(nn_nlayer+1):
+                W[j] += -eps*dLdW[j]
+                W[j] += reg_lambda*W[j]            
 
-            b[j] += -eps*dLdb[j]
-        model = [W,b]    
+                b[j] += -eps*dLdb[j]
+            model = [W,b]    
 
-        if np.mod(i,50) == 0:
-            loss = calculateLoss(yhat)
+            if np.mod(i,50) == 0:
+                loss = calculateLoss(yhat)
 
-            print(loss)
-            plotDecisionBoundary(model,fig)
-            plt.pause(0.0001)
-            if loss < 0.03:
-                break
+                print(loss)
+                plotDecisionBoundary(model,fig)
+                writer.grab_frame()
+                if loss < 0.05:
+                    break
         
     return model
 

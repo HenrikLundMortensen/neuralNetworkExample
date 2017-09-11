@@ -1,4 +1,7 @@
 \documentclass[oneside]{memoir}
+\usepackage[]{tikz}
+\usetikzlibrary{shapes,arrows,chains}
+\usetikzlibrary[calc]
 \usepackage{amsmath}
 \usepackage[]{graphicx}
 
@@ -23,12 +26,34 @@
 \section{Neural network as a classifier}
 The neural network (NN) presented in this note solves a classification problem; Given $\vec{x}$ and a set of classes $Y$, determine which class $\vec{x}$ belongs to. 
 
-The NN is a nonlinear function with a lot of parameters, or weights $\{W,b\}$. The output is a vector, $\hat{\vec{y}}$, where the $i$'th entry is the estimated probability that the input belongs to the class $\vec{y}_{k} = \delta_{ik} \in Y$. The training consists of
+The NN is a nonlinear function with a lot of parameters, or weights $\{W,b\}$.
+
+\begin{equation}
+  \label{NN}
+\yhat{} = f_{NN}(\vec{x},W,b)
+\end{equation}
+
+The output is a vector, $\hat{\vec{y}}$, where the $i$'th entry is the estimated probability that the input belongs to the class $\vec{y}_{k} = \delta_{ik} \in Y$. The training consists of finding the weigths such that $\yhat{}$. 
+
+
+% \begin{tikzpicture}
+%   \node at (0,1) {Hello!};
+%   \node at (13,1) {Hello!};
+
+%   \node at (0.1)
+
+%   \node at (0,10) {Hello!};
+%   \node at (13,10) {Hello!};
+
+
+
+% \end{tikzpicture}
+\input{myNetworkDrawing}
+
+% \footnote{The are often issues of overfitting, where the training data }
 
 % By adjusting the weights, the NN will (hopefully) be able to determine which class an input vector belongs to. 
-
 % The NN is trained on a set of training examples, $\{\vec{x},\vec{y}\}$, where $\vec{y} \in Y$, by adjusting the weights, $\{W,b\}$.
-
 
 \begin{equation}
   \label{activation function tanh}
