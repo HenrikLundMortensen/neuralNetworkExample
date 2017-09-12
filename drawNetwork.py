@@ -40,9 +40,9 @@ for i in range(nlayer):
         position = pos[i][j]
         # print('\\node[cir,name=n%i%i] at (%g,%g) {};' %(i,j,position[0],position[1]))
         if i ==1 and j == nnodes_i-1:
-            print('\\node[draw,circle,minimum size=%gcm,name=n%i%i,align=center] at (%g,%g) {$z_{1}^{(1)} =$\\\\$ \\text{tanh}(a_{1}^{(1)})$};' %(radius,i,j,position[0],position[1]))
+            print('\\node[draw,circle,minimum size=%gcm,name=n%i%i,align=center] at (%g,%g) {$z_{1}^{(1)} =$\\\\$ \\text{tanh}([\\vec{x}^TW^{(1)}]_1+ b_1^{(1)})$};' %(radius,i,j,position[0],position[1]))
         elif i ==2 and j == nnodes_i-1:
-            print('\\node[draw,circle,minimum size=%gcm,name=n%i%i,align=center] at (%g,%g) {$\hat{y}_{1} =$\\\\$ \\text{softmax}(a_{1}^{(2)})$};' %(radius,i,j,position[0],position[1]))
+            print('\\node[draw,circle,minimum size=%gcm,name=n%i%i,align=center] at (%g,%g) {$\hat{y}_{1} =$\\\\$ \\text{softmax}([z^{T(1)}W^{(2)}]_1 + b_1^{(2)})$};' %(radius,i,j,position[0],position[1]))
         elif i ==0 and j == nnodes_i-1:
             print('\\node[draw,circle,minimum size=%gcm,name=n%i%i,align=center] at (%g,%g) {$x_1$};' %(radius,i,j,position[0],position[1]))
         elif i ==0 and j == 0:
@@ -59,9 +59,9 @@ for j in range(nlayer):
             nnodes_tmp2 = nnodes[j+1]
             for i in range(nnodes_tmp2):
                 if j==0 and k==1 and i == nnodes_tmp2-1:
-                    print('\\draw[->,name=a%i%i%i%i] (n%i%i) -- node[sloped,anchor=center,above] {$a_{1}^{(1)} =x_{1}W_{11}^{(1)} + b_1^{(1)}$} (n%i%i);' %(j,k,j+1,i,j,k,j+1,i))
+                    print('\\draw[->,name=a%i%i%i%i] (n%i%i) -- node[sloped,anchor=center,above] {$W_{11}^{(1)}$} (n%i%i);' %(j,k,j+1,i,j,k,j+1,i))
                 elif j==1 and k==nnodes_tmp-1 and i == nnodes_tmp2-1:
-                    print('\\draw[->,name=a%i%i%i%i] (n%i%i) -- node[sloped,anchor=center,above] {$a_{1}^{(2)} =z_{1}^{(1)}W_{11}^{(2)} + b_1^{(2)}$} (n%i%i);' %(j,k,j+1,i,j,k,j+1,i))
+                    print('\\draw[->,name=a%i%i%i%i] (n%i%i) -- node[sloped,anchor=center,above] {$W_{11}^{(2)}$} (n%i%i);' %(j,k,j+1,i,j,k,j+1,i))
                 else:
                     print('\\draw[->,name=a%i%i%i%i] (n%i%i) -- (n%i%i);' %(j,k,j+1,i,j,k,j+1,i))                    
 

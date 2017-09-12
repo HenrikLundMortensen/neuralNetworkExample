@@ -5,6 +5,13 @@ from matplotlib import pyplot as plt
 
 X, y = sklearn.datasets.make_moons(200, noise=0.2)
 
+fig = plt.figure()
+ax = fig.gca()
+ax.scatter(X[:,0], X[:,1], s=40, c=y, cmap=plt.cm.Spectral)
+ax.set_xticks([])
+ax.set_yticks([])
+plt.savefig('data_scatter.png')
+
 nn_hdim = 3
 num_examples = len(X)
 nn_input_dim = 2
