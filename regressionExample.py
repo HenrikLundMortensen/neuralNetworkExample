@@ -8,7 +8,7 @@ import time
 # y = np.array(np.sin(X) +np.sin(X*2)+np.sin(X*5)).reshape(-1,1)
 # y = np.ravel(y)
 #create neural net regressor
-reg = MLPRegressor(hidden_layer_sizes=(10,10),solver="lbfgs",max_iter=10000,alpha = 0.001)
+reg = MLPRegressor(hidden_layer_sizes=(30,30),solver="lbfgs",max_iter=10000,alpha = 0.01)
 # reg.fit(X,y)
 
 # fig = plt.figure()
@@ -36,13 +36,21 @@ detList = np.array(detList)
 reg.fit(MatList,detList)
 
 
+
+
+
+
+
+
+
 Ntest = 100
 error = 0
 timedet = 0
 timepredict = 0
 
 for i in range(Ntest):
-    print(i)
+    if np.mod(i,10)==0:
+        print(i)
     
     testmat = np.random.rand(N**2)
     t1 = time.time()
